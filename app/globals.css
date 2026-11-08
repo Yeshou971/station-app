@@ -1,50 +1,262 @@
 @import "leaflet/dist/leaflet.css";
 
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-size: 15px; line-height: 1.4; color: #222; background: #fff; }
+* {
+  box-sizing: border-box;
+}
 
-.page { max-width: 1200px; margin: 0 auto; padding: 16px; }
-.header h1 { margin: 0 0 2px; font-size: 22px; }
-.header p { margin: 0 0 14px; color: #555; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #1f2937;
+  background: #f5f7f9;
+}
 
-.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; padding: 10px; border: 1px solid #ccc; background: #f6f6f6; }
-.filters label { display: flex; flex-direction: column; gap: 3px; font-size: 13px; color: #444; }
-.filters select, .filters input { height: 34px; min-width: 140px; padding: 0 8px; border: 1px solid #999; background: #fff; font: inherit; color: #222; }
-.filters button { height: 34px; padding: 0 12px; border: 1px solid #1a56a0; background: #1a56a0; color: #fff; font: inherit; cursor: pointer; }
-.filters button:disabled { opacity: .6; cursor: default; }
-.error { color: #a00; margin: 8px 0 0; }
-.summary { margin: 10px 0; color: #444; min-height: 1.4em; }
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
 
-.layout { display: grid; grid-template-columns: 1fr 380px; gap: 12px; align-items: start; }
-.map-col { position: sticky; top: 8px; }
-.map { height: 560px; width: 100%; border: 1px solid #ccc; }
-.map-loading { display: flex; align-items: center; justify-content: center; color: #666; background: #eee; }
+.header h1 {
+  margin: 0 0 2px;
+  font-size: 24px;
+  letter-spacing: -0.3px;
+}
 
-.list { list-style: none; margin: 0; padding: 0; max-height: 560px; overflow-y: auto; border: 1px solid #ccc; }
-.item { border-bottom: 1px solid #ddd; }
-.item:last-child { border-bottom: 0; }
-.item button { display: flex; gap: 10px; align-items: center; width: 100%; padding: 8px 10px; border: 0; background: #fff; font: inherit; color: inherit; text-align: left; cursor: pointer; }
-.item button:hover { background: #f2f2f2; }
-.item.selected button { background: #e8f0fa; }
-.rank { width: 22px; flex: none; color: #777; font-size: 13px; text-align: right; }
-.info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.city { font-weight: 600; }
-.addr, .meta { font-size: 13px; color: #555; }
-.meta { color: #777; font-size: 12px; }
-.price { flex: none; font-weight: 700; white-space: nowrap; }
-.empty { padding: 14px; color: #666; }
+.header p {
+  margin: 0 0 14px;
+  color: #555;
+}
 
-.footer { margin-top: 16px; font-size: 12px; color: #666; }
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  padding: 14px;
+  border: 1px solid #e2e6ea;
+  border-radius: 8px;
+  background: #fff;
+}
 
-.pin-wrap { background: none; border: 0; }
-.pin { display: inline-block; transform: translate(-50%, -50%); padding: 1px 5px; border: 1px solid #333; background: #fff; color: #222; font: 600 12px system-ui, sans-serif; white-space: nowrap; }
-.pin-best { background: #1f7a3d; border-color: #1f7a3d; color: #fff; }
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  color: #444;
+}
+
+.filters select,
+.filters input {
+  height: 36px;
+  min-width: 140px;
+  padding: 0 10px;
+  border: 1px solid #c9d0d6;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  color: #1f2937;
+}
+
+.filters select:focus,
+.filters input:focus {
+  outline: 2px solid #bcd3f0;
+  border-color: #1a56a0;
+}
+
+.filters button {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #1a56a0;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.filters button:hover:not(:disabled) {
+  background: #154684;
+}
+
+.error {
+  color: #a00;
+  margin: 8px 0 0;
+}
+
+.summary {
+  margin: 10px 0;
+  color: #444;
+  min-height: 1.4em;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 12px;
+  align-items: start;
+}
+
+.map-col {
+  position: sticky;
+  top: 8px;
+}
+
+.map {
+  height: 560px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  background: #eee;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 560px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.item {
+  border-bottom: 1px solid #ddd;
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+.item button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item button:hover {
+  background: #f2f2f2;
+}
+
+.item.selected button {
+  background: #e8f0fa;
+}
+
+.rank {
+  width: 22px;
+  flex: none;
+  color: #777;
+  font-size: 13px;
+  text-align: right;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.city {
+  font-weight: 600;
+}
+
+.addr,
+.meta {
+  font-size: 13px;
+  color: #555;
+}
+
+.meta {
+  color: #777;
+  font-size: 12px;
+}
+
+.price {
+  flex: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f7a3d;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 14px;
+  color: #666;
+}
+
+.footer {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #666;
+}
+
+.pin-wrap {
+  background: none;
+  border: 0;
+}
+
+.pin {
+  display: inline-block;
+  transform: translate(-50%, -50%);
+  padding: 1px 5px;
+  border: 1px solid #333;
+  background: #fff;
+  color: #222;
+  font: 600 12px system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.pin-best {
+  background: #1f7a3d;
+  border-color: #1f7a3d;
+  color: #fff;
+}
 
 @media (max-width: 800px) {
-  .layout { grid-template-columns: 1fr; }
-  .map-col { position: static; }
-  .map { height: 340px; }
-  .list { max-height: none; }
-  .filters select, .filters input { min-width: 0; width: 100%; }
-  .filters label { flex: 1 1 140px; }
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-col {
+    position: static;
+  }
+
+  .map {
+    height: 340px;
+  }
+
+  .list {
+    max-height: none;
+  }
+
+  .filters select,
+  .filters input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .filters label {
+    flex: 1 1 140px;
+  }
 }

@@ -1,5 +1,5 @@
-import StationExplorer from "@/components/StationExplorer";
+import StationExplorer from "@/components/StationExplorer"
 
 export default function Home() {
-  return <StationExplorer />;
+  return <StationExplorer />
 }

@@ -1,83 +1,83 @@
-"use client";
-import { useEffect, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
-import type { Fuel, Station } from "@/types/station";
-import { FUEL_OPTIONS } from "@/types/station";
-import { distanceKm, formatDate, formatPrice, getFuelPrice } from "@/lib/fuel";
+"use client"
+import { useEffect, useMemo, useState } from "react"
+import dynamic from "next/dynamic"
+import type { Fuel, Station } from "@/types/station"
+import { FUEL_OPTIONS } from "@/types/station"
+import { distanceKm, formatDate, formatPrice, getFuelPrice } from "@/lib/fuel"
 
 const StationMap = dynamic(() => import("@/components/StationMap"), {
   ssr: false,
   loading: () => <div className="map map-loading">Chargement de la carte…</div>,
-});
+})
 
-const ALL = "Tous";
-const MAX_RESULTS = 100;
-const RADIUS_OPTIONS = [2, 5, 10, 20, 50];
+const ALL = "Tous"
+const MAX_RESULTS = 100
+const RADIUS_OPTIONS = [2, 5, 10, 20, 50]
 
-type Position = { lat: number; lon: number };
-type Row = { station: Station; price: number; distance: number | null };
+type Position = { lat: number; lon: number }
+type Row = { station: Station; price: number; distance: number | null }
 
-const uniq = (values: string[]) => Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b, "fr"));
+const uniq = (values: string[]) => Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b, "fr"))
 
 export default function StationExplorer() {
-  const [stations, setStations] = useState<Station[]>([]);
-  const [loadError, setLoadError] = useState(false);
-  const [fuel, setFuel] = useState<Fuel>("Gazole");
-  const [region, setRegion] = useState("Île-de-France");
-  const [department, setDepartment] = useState(ALL);
-  const [city, setCity] = useState(ALL);
-  const [search, setSearch] = useState("");
-  const [position, setPosition] = useState<Position | null>(null);
-  const [radius, setRadius] = useState(10);
-  const [geoError, setGeoError] = useState("");
-  const [locating, setLocating] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [stations, setStations] = useState<Station[]>([])
+  const [loadError, setLoadError] = useState(false)
+  const [fuel, setFuel] = useState<Fuel>("Gazole")
+  const [region, setRegion] = useState("Île-de-France")
+  const [department, setDepartment] = useState(ALL)
+  const [city, setCity] = useState(ALL)
+  const [search, setSearch] = useState("")
+  const [position, setPosition] = useState<Position | null>(null)
+  const [radius, setRadius] = useState(10)
+  const [geoError, setGeoError] = useState("")
+  const [locating, setLocating] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/data/stations.json")
-      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((r) => { if (!r.ok) throw new Error(); return r.json() })
       .then((data) => setStations(data as Station[]))
-      .catch(() => setLoadError(true));
-  }, []);
+      .catch(() => setLoadError(true))
+  }, [])
 
-  const regions = useMemo(() => uniq(stations.map((s) => s.region)), [stations]);
-  const inRegion = useMemo(() => stations.filter((s) => region === ALL || s.region === region), [stations, region]);
-  const departments = useMemo(() => uniq(inRegion.map((s) => s.department)), [inRegion]);
-  const inDept = useMemo(() => inRegion.filter((s) => department === ALL || s.department === department), [inRegion, department]);
-  const cities = useMemo(() => uniq(inDept.map((s) => s.city)), [inDept]);
+  const regions = useMemo(() => uniq(stations.map((s) => s.region)), [stations])
+  const inRegion = useMemo(() => stations.filter((s) => region === ALL || s.region === region), [stations, region])
+  const departments = useMemo(() => uniq(inRegion.map((s) => s.department)), [inRegion])
+  const inDept = useMemo(() => inRegion.filter((s) => department === ALL || s.department === department), [inRegion, department])
+  const cities = useMemo(() => uniq(inDept.map((s) => s.city)), [inDept])
 
   const rows = useMemo<Row[]>(() => {
-    const q = search.trim().toLowerCase();
-    // Avec la position, on cherche dans tout le pays ; sinon selon les filtres de zone
-    const pool = position ? stations : inDept;
-    const out: Row[] = [];
+    const q = search.trim().toLowerCase()
+    // Avec la position, on cherche dans tout le pays  sinon selon les filtres de zone
+    const pool = position ? stations : inDept
+    const out: Row[] = []
     for (const s of pool) {
-      const price = getFuelPrice(s, fuel);
-      if (price === null) continue;
-      let distance: number | null = null;
+      const price = getFuelPrice(s, fuel)
+      if (price === null) continue
+      let distance: number | null = null
       if (position) {
-        distance = distanceKm(position.lat, position.lon, s.latitude, s.longitude);
-        if (distance > radius) continue;
-      } else if (city !== ALL && s.city !== city) continue;
-      if (q && !`${s.city} ${s.postalCode} ${s.address}`.toLowerCase().includes(q)) continue;
-      out.push({ station: s, price, distance });
+        distance = distanceKm(position.lat, position.lon, s.latitude, s.longitude)
+        if (distance > radius) continue
+      } else if (city !== ALL && s.city !== city) continue
+      if (q && !`${s.city} ${s.postalCode} ${s.address}`.toLowerCase().includes(q)) continue
+      out.push({ station: s, price, distance })
     }
-    out.sort((a, b) => a.price - b.price || (a.distance ?? 0) - (b.distance ?? 0));
-    return out;
-  }, [stations, inDept, city, fuel, search, position, radius]);
+    out.sort((a, b) => a.price - b.price || (a.distance ?? 0) - (b.distance ?? 0))
+    return out
+  }, [stations, inDept, city, fuel, search, position, radius])
 
-  const shown = useMemo(() => rows.slice(0, MAX_RESULTS), [rows]);
-  const shownStations = useMemo(() => shown.map((r) => r.station), [shown]);
+  const shown = useMemo(() => rows.slice(0, MAX_RESULTS), [rows])
+  const shownStations = useMemo(() => shown.map((r) => r.station), [shown])
 
   function locate() {
-    setGeoError("");
-    if (!navigator.geolocation) { setGeoError("La géolocalisation n'est pas disponible sur cet appareil."); return; }
-    setLocating(true);
+    setGeoError("")
+    if (!navigator.geolocation) { setGeoError("La géolocalisation n'est pas disponible sur cet appareil."); return }
+    setLocating(true)
     navigator.geolocation.getCurrentPosition(
-      (p) => { setPosition({ lat: p.coords.latitude, lon: p.coords.longitude }); setSelectedId(null); setLocating(false); },
-      () => { setGeoError("Position refusée ou introuvable. Utilise les filtres région / ville."); setLocating(false); },
+      (p) => { setPosition({ lat: p.coords.latitude, lon: p.coords.longitude }); setSelectedId(null); setLocating(false) },
+      () => { setGeoError("Position refusée ou introuvable. Utilise les filtres région / ville."); setLocating(false) },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
-    );
+    )
   }
 
   return (
@@ -104,17 +104,17 @@ export default function StationExplorer() {
             <label>Adresse ou code postal
               <input value={search} onChange={(e) => setSearch(e.target.value)} />
             </label>
-            <button type="button" onClick={() => { setPosition(null); setSelectedId(null); }}>Revenir aux filtres</button>
+            <button type="button" onClick={() => { setPosition(null); setSelectedId(null) }}>Revenir aux filtres</button>
           </>
         ) : (
           <>
             <label>Région
-              <select value={region} onChange={(e) => { setRegion(e.target.value); setDepartment(ALL); setCity(ALL); }}>
+              <select value={region} onChange={(e) => { setRegion(e.target.value); setDepartment(ALL); setCity(ALL) }}>
                 <option>{ALL}</option>{regions.map((r) => <option key={r}>{r}</option>)}
               </select>
             </label>
             <label>Département
-              <select value={department} onChange={(e) => { setDepartment(e.target.value); setCity(ALL); }}>
+              <select value={department} onChange={(e) => { setDepartment(e.target.value); setCity(ALL) }}>
                 <option>{ALL}</option>{departments.map((d) => <option key={d}>{d}</option>)}
               </select>
             </label>
@@ -172,5 +172,5 @@ export default function StationExplorer() {
         Source : « Prix des carburants en France – flux instantané », data.economie.gouv.fr. Les prix sont ceux déclarés par les stations et peuvent avoir changé depuis. Les carburants en rupture ou sans prix valide sont exclus.
       </footer>
     </div>
-  );
+  )
 }
