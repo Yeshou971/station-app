@@ -1,0 +1,7 @@
+{
+  "sourceFile": "stations-source.json",
+  "sourceRows": 9826,
+  "stationsExtracted": 9826,
+  "skippedNoGeo": 0,
+  "excludedSuspiciousPrices": []
+}
